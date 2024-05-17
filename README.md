@@ -1,1 +1,3 @@
-Javascript basics notes for future reference.
+---> Javascript basics notes for future reference.
+---> Created of AD07.
+---> Contains all basics concepts related to javascripts with easy examples.
