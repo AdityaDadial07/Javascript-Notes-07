@@ -1,3 +1,6 @@
----> Javascript basics notes for future reference.
----> Created of AD07.
----> Contains all basics concepts related to javascripts with easy examples.
+JavaScript Basics Notes
+Overview
+This repository contains notes on the basics of JavaScript, intended for future reference. It covers all fundamental concepts with easy-to-understand examples.
+
+Author
+Created by AD07
