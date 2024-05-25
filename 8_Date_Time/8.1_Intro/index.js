@@ -27,4 +27,26 @@ let currentDate5=new Date().getTime();
 console.log(currentDate5);
 
 //To get complete date and time
-le
+let completeDateAndTime=new Date();
+console.log(completeDateAndTime);
+
+//Get full year
+console.log(completeDateAndTime.getFullYear())
+
+//Get month
+console.log(completeDateAndTime.getMonth()) //4 mean may //array start from 0
+
+//Get week day
+console.log(completeDateAndTime.getDay())// sunday ->0 1->monday
+
+//Get month date
+console.log(completeDateAndTime.getDate())
+
+//Get Hours
+console.log(completeDateAndTime.getHours())
+
+//Get Minutes
+console.log(completeDateAndTime.getMinutes())
+
+//Get Seconds
+console.log(completeDateAndTime.getSeconds())
