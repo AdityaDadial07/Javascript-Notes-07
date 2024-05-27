@@ -19,7 +19,7 @@
 // let newbike=new Bike("Black",2020);
 // console.log(newbike);
 
-//Parent class
+// Parent class
 class Car{
     constructor(color,model){
         this.color=color;
@@ -56,3 +56,29 @@ console.log(newbike.__proto__);
 /////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////
 
+//Prototypical inheritence(using constructor function)
+//Parent class
+let Car=function(color,model){
+    this.color=color;
+    this.model=model;
+}
+
+Car.prototype.startEngine=function(){
+    console.log("This is start engine method");
+}
+
+//Child class
+let Bike=function(color,model,engineCapacity){
+    Car.call(this,color,model);
+    this.engineCapacity=engineCapacity;
+}
+//Inherited from parent class
+// Bike.prototype=Object.create(Car.prototype);
+
+//Not inherited
+Bike.prototype.ownBike=function(){
+    console.log("This is own bike class method");
+}
+
+let bike1=new Bike("Green",2020,"2000CC David putra");
+console.log(bike1);
