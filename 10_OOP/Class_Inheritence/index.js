@@ -36,7 +36,7 @@ class Bike extends Car{
         super(color,model)
         this.engineCapacity=engineCapacity
      }
-
+     // Bike method
      bikeMethod(){
         console.log("This is method of bike class");
      }
