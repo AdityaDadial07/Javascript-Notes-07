@@ -8,3 +8,4 @@ setTimeout(()=>{console.log("Call back function after 3 seconds")},3000); //This
 
 console.log(3);
 console.log(4);
+console.log(5);
