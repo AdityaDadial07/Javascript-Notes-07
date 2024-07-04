@@ -1,34 +1,57 @@
-name: Releases
+name: Release
+
 on:
   push:
     branches:
       - main
 
 jobs:
-  version:
-    name: Version
+  release:
     runs-on: ubuntu-latest
-    outputs:
-      skip-publish: ${{ steps.bumpr.outputs.skip }}
-      next_version: ${{ steps.bumpr.outputs.next_version }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Bump Version
-        uses: haya14busa/action-bumpr@v1
-        id: bumpr
-        with:
-          default_bump_level: ${{ inputs.default-bump-level }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-  prep-matrix:
-    name: Prep Matrix
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - id: set-matrix
-        run: echo "matrix={'include':${{ inputs.build-paths }}}" >> $GITHUB_OUTPUT
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'  # Adjust this to the required Node.js version
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Adjust this to the required Python version
+
+    - name: Install dependencies
+      run: |
+        npm install -g semver
+        pip install git-cliff
+
+    - name: Determine next version
+      id: next_version
+      run: |
+        CURRENT_VERSION=$(git describe --tags --abbrev=0)
+        echo "Current version: $CURRENT_VERSION"
+        NEXT_VERSION=$(semver bump $(git cliff -u minor|patch|major) $CURRENT_VERSION)  # Adjust the bump type (minor, patch, major) as needed
+        echo "Next version: $NEXT_VERSION"
+        echo ::set-output name=version::$NEXT_VERSION
+
+    - name: Generate changelog
+      run: git cliff > CHANGELOG.md
+
+    - name: Commit changelog
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add CHANGELOG.md
+        git commit -m 'chore: update changelog for ${{ steps.next_version.outputs.version }}'
+
+    - name: Create tag
+      run: |
+        git tag -a ${{ steps.next_version.outputs.version }} -m "Release ${{ steps.next_version.outputs.version }}"
+
+    - name: Push changes and tag
+      run: |
+        git push origin main
+        git push origin ${{ steps.next_version.outputs.version }}
