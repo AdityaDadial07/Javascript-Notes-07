@@ -1,9 +1,7 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -17,7 +15,7 @@ jobs:
         id: semver
         uses: ietf-tools/semver-action@v1
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has the necessary permissions
           branch: main
 
       - name: Create Release
@@ -28,4 +26,4 @@ jobs:
           makeLatest: true
           name: ${{ steps.semver.outputs.next }}
           body: Changelog Contents
-          token: ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has the necessary permissions
