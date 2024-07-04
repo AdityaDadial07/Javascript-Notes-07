@@ -5,24 +5,30 @@ on:
       - main
 
 jobs:
-  changelog:
+  version:
+    name: Version
     runs-on: ubuntu-latest
+    outputs:
+      skip-publish: ${{ steps.bumpr.outputs.skip }}
+      next_version: ${{ steps.bumpr.outputs.next_version }}
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: conventional Changelog Action
-        id: changelog
-        uses: TriPSs/conventional-changelog-action@v3.7.1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          github-token: ${{ secrets.CHANGELOG_RELEASE }}
+          fetch-depth: 0
 
-      - name: create release
-        uses: actions/create-release@v1
-        if: ${{ steps.changelog.outputs.skipped == 'false' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.CHANGELOG_RELEASE }}
+      - name: Bump Version
+        uses: haya14busa/action-bumpr@v1
+        id: bumpr
         with:
-          tag_name: ${{ steps.changelog.outputs.tag }}
-          release_name: ${{ steps.changelog.outputs.tag }}
-          body: ${{ steps.changelog.outputs.clean_changelog }}
+          default_bump_level: ${{ inputs.default-bump-level }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+  prep-matrix:
+    name: Prep Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: echo "matrix={'include':${{ inputs.build-paths }}}" >> $GITHUB_OUTPUT
