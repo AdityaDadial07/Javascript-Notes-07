@@ -10,11 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       
       - name: Set up GitCliff
-        uses: gitcliff/action-git-cliff@v2
-        id: cliff
+        uses: kenji-miyake/setup-git-cliff@v1
+
+      - name: Run git-cliff
+        run: git cliff
         
       - name: Determine Version Bump
         id: version_bump
