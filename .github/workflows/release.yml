@@ -17,9 +17,6 @@ jobs:
       - name: Set up git-cliff
         uses: kenji-miyake/setup-git-cliff@v1
 
-      - name: Run git-cliff
-        run: git cliff
-
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v3
         with:
@@ -32,8 +29,43 @@ jobs:
       - name: Determine Version Bump
         id: version_bump
         run: |
-          # Determine the new version based on the changelog
-          NEW_VERSION=$(git cliff --new-tag)
+          # Get the current version
+          CURRENT_VERSION=$(git describe --tags --abbrev=0)
+          echo "Current Version: $CURRENT_VERSION"
+          
+          # Determine the new version based on commit messages
+          COMMITS=$(git log --pretty=format:"%s" $CURRENT_VERSION..HEAD)
+          MAJOR=false
+          MINOR=false
+          PATCH=false
+          
+          for COMMIT in $COMMITS; do
+            if [[ "$COMMIT" == "feat:"* ]]; then
+              MINOR=true
+            elif [[ "$COMMIT" == "fix:"* ]]; then
+              PATCH=true
+            elif [[ "$COMMIT" == "BREAKING CHANGE:"* ]]; then
+              MAJOR=true
+            fi
+          done
+          
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR_VERSION=${VERSION_PARTS[0]}
+          MINOR_VERSION=${VERSION_PARTS[1]}
+          PATCH_VERSION=${VERSION_PARTS[2]}
+          
+          if $MAJOR; then
+            MAJOR_VERSION=$((MAJOR_VERSION + 1))
+            MINOR_VERSION=0
+            PATCH_VERSION=0
+          elif $MINOR; then
+            MINOR_VERSION=$((MINOR_VERSION + 1))
+            PATCH_VERSION=0
+          elif $PATCH; then
+            PATCH_VERSION=$((PATCH_VERSION + 1))
+          fi
+          
+          NEW_VERSION="v$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
           echo "New Version: $NEW_VERSION"
           
           echo "::set-output name=new_version::$NEW_VERSION"
