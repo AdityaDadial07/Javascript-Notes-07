@@ -56,14 +56,19 @@ jobs:
         git add CHANGELOG.md
         git commit -m "chore: update changelog for ${{ steps.next_version.outputs.version }}"
 
-    - name: Create tag
+    - name: Create tag if not exists
       run: |
-        git tag -a ${{ steps.next_version.outputs.version }} -m "Release ${{ steps.next_version.outputs.version }}"
+        TAG_EXISTS=$(git tag -l "${{ steps.next_version.outputs.version }}")
+        if [ -z "$TAG_EXISTS" ]; then
+          git tag -a ${{ steps.next_version.outputs.version }} -m "Release ${{ steps.next_version.outputs.version }}"
+        else
+          echo "Tag ${{ steps.next_version.outputs.version }} already exists"
+        fi
 
     - name: Push changes and tag
       run: |
         git push origin main
-        git push origin ${{ steps.next_version.outputs.version }}
+        git push origin --tags
 
     - name: Create GitHub Release
       uses: actions/create-release@v1
@@ -74,3 +79,6 @@ jobs:
         release_name: Release ${{ steps.next_version.outputs.version }}
         body: |
           ## Changelog
+          ${{ steps.next_version.outputs.version }}
+        draft: false
+        prerelease: false
