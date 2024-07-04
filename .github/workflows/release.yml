@@ -92,7 +92,20 @@ jobs:
           NEW_VERSION=${{ steps.version_bump.outputs.new_version }}
           git tag "$NEW_VERSION" HEAD
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} "$NEW_VERSION"
-      
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version_bump.outputs.new_version }}
+          release_name: Release ${{ steps.version_bump.outputs.new_version }}
+          body: |
+            ## Changelog
+            $(cat CHANGELOG.md)
+          draft: false
+          prerelease: false
+
       - name: Print New Version
         run: |
-         echo "New version tagged: ${{ steps.version_bump.outputs.new_version }}"
+         echo "New version tagged and released: ${{ steps.version_bump.outputs.new_version }}"
