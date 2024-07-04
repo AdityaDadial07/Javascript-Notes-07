@@ -30,7 +30,7 @@ jobs:
         id: version_bump
         run: |
           # Get the current version
-          CURRENT_VERSION=$(git describe --tags --abbrev=0)
+          CURRENT_VERSION=$(git describe --tags --abbrev=0 || echo "v0.0.0")
           echo "Current Version: $CURRENT_VERSION"
           
           # Determine the new version based on commit messages
@@ -44,12 +44,12 @@ jobs:
               MINOR=true
             elif [[ "$COMMIT" == "fix:"* ]]; then
               PATCH=true
-            elif [[ "$COMMIT" == "BREAKING CHANGE:"* ]]; then
+            elif [[ "$COMMIT" == *"BREAKING CHANGE"* ]]; then
               MAJOR=true
             fi
           done
           
-          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          IFS='.' read -ra VERSION_PARTS <<< "${CURRENT_VERSION#v}"
           MAJOR_VERSION=${VERSION_PARTS[0]}
           MINOR_VERSION=${VERSION_PARTS[1]}
           PATCH_VERSION=${VERSION_PARTS[2]}
@@ -63,6 +63,8 @@ jobs:
             PATCH_VERSION=0
           elif $PATCH; then
             PATCH_VERSION=$((PATCH_VERSION + 1))
+          else
+            PATCH_VERSION=$((PATCH_VERSION + 1))  # Default to patch bump if no commits matched
           fi
           
           NEW_VERSION="v$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
@@ -82,5 +84,5 @@ jobs:
           git push origin "$NEW_VERSION"
       
       - name: Print New Version
-        run: |
+        run: | 
          echo "New version tagged: ${{ steps.version_bump.outputs.new_version }}"
