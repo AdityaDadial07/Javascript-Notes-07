@@ -8,7 +8,7 @@ console.log(nums.at(2));
 //Getting elements from last
 console.log(nums[nums.length-1]);
 
-console.log(nums.at(-2))
+console.log(nums.at(-1))
 
 //at also work on strings
 let name="aditya";
