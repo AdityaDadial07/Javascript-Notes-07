@@ -36,7 +36,7 @@ jobs:
           echo "No tags found, setting initial version to 0.1.0"
           CURRENT_VERSION="0.0.0"
         else
-          CURRENT_VERSION=$(git describe --tags --abbrev=0)
+          CURRENT_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
         fi
         echo "Current version: $CURRENT_VERSION"
         NEXT_VERSION=$(semver bump minor $CURRENT_VERSION)  # Adjust the bump type (minor, patch, major) as needed
