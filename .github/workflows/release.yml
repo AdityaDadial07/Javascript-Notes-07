@@ -1,4 +1,4 @@
-name: Generate Changelog on Push to Main
+name: Auto Version Bump and Tagging
 
 on:
   push:
@@ -6,20 +6,33 @@ on:
       - main
 
 jobs:
-  build:
+  version-bump-and-tag:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: Set up GitCliff
+        uses: gitcliff/action-git-cliff@v2
+        id: cliff
+        
+      - name: Determine Version Bump
+        run: |
+          VERSION_BUMP=$(echo "${{ steps.cliff.outputs.version }}" | cut -d' ' -f2)
+          echo "Version Bump: $VERSION_BUMP"
+          
+          # Assuming the output format from GitCliff is "git cliff vX.Y.Z", extract the version number
+          NEW_VERSION=$(echo "$VERSION_BUMP" | grep -oP 'v\K\d+\.\d+\.\d+')
+          
+          echo "New Version: $NEW_VERSION"
+          
+          # Create a new tag with the determined version
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git tag "$NEW_VERSION" HEAD
+          
+          # Push the new tag to the remote repository
+          git push origin "$NEW_VERSION"
 
-    - name: Generate a changelog
-      uses: orhun/git-cliff-action@v3
-      with:
-        config: cliff.toml
-        args: --verbose
-      env:
-        OUTPUT: CHANGELOG.md
-        GITHUB_REPO: ${{ github.repository }}
+      - name: Print New Version
+        run: echo "New version tagged: ${{ steps.cliff.outputs.version }}"
