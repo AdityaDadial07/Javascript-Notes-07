@@ -1,4 +1,4 @@
-name: Auto Version Bump and Tagging
+name: Deploy
 
 on:
   push:
@@ -6,23 +6,26 @@ on:
       - main
 
 jobs:
-  changelog:
-    name: Generate changelog
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
-        id: git-cliff
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
         with:
-          config: cliff.toml
-          args: --verbose
-        env:
-          OUTPUT: CHANGELOG.md
+          token: ${{ github.token }}
+          branch: main
 
-      - name: Print the changelog
-        run: cat "${{ steps.git-cliff.outputs.changelog }}"
+      - name: Create Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ steps.semver.outputs.next }}
+          body: Changelog Contents
+          token: ${{ github.token }}
