@@ -1,29 +1,28 @@
-name: Deploy
-
+name: Releases
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  changelog:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
-      - name: Get Next Version
-        id: semver
-        uses: ietf-tools/semver-action@v1
+      - name: conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3.7.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has the necessary permissions
-          branch: main
+          github-token: ${{ secrets.CHANGELOG_RELEASE }}
 
-      - name: Create Release
-        uses: ncipollo/release-action@v1.12.0
+      - name: create release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHANGELOG_RELEASE }}
         with:
-          allowUpdates: true
-          draft: false
-          makeLatest: true
-          name: ${{ steps.semver.outputs.next }}
-          body: Changelog Contents
-          token: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has the necessary permissions
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
