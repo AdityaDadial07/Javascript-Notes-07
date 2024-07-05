@@ -37,11 +37,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Node.js (to use git-cliff)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
       - name: Generate a changelog
         uses: orhun/git-cliff-action@v3
         id: git-cliff
