@@ -1,4 +1,9 @@
 Changelog
+### Chore
+
+- Update CHANGELOG.md
+
+
 ### Ci
 
 - Update release2.yml
@@ -14,6 +19,8 @@ Changelog
 - Update release.yml
 
 - Delete cliff.toml
+
+- Update release2.yml
 
 - Update release2.yml
 
