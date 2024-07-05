@@ -1,4 +1,4 @@
-name: Auto Version Bump and Tagging
+name: Release
 
 on:
   push:
