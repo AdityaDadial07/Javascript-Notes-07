@@ -21,3 +21,5 @@ jobs:
         with:
           name: ${{ steps.version.outputs.nextVersion }}
           tag_name: ${{ steps.version.outputs.nextVersion }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
