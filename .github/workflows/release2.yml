@@ -1,53 +1,53 @@
-name: Release
+# name: Release
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
       
-permissions:
-  contents: write  # Grant write permissions to the GITHUB_TOKEN
+# permissions:
+#   contents: write  # Grant write permissions to the GITHUB_TOKEN
 
-jobs:
-  changelog:
-    name: Generate changelog
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+# jobs:
+#   changelog:
+#     name: Generate changelog
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
 
-      - name: Set up Node.js (to use git-cliff)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
+#       - name: Set up Node.js (to use git-cliff)
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '16'
 
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
-        id: git-cliff
-        with:
-          config: cliff.toml
-          args: --verbose
-        env:
-          OUTPUT: CHANGELOG.md
+#       - name: Generate a changelog
+#         uses: orhun/git-cliff-action@v3
+#         id: git-cliff
+#         with:
+#           config: cliff.toml
+#           args: --verbose
+#         env:
+#           OUTPUT: CHANGELOG.md
 
-      # - name: Debug Print config
-      #   run: cat cliff.toml
+#       # - name: Debug Print config
+#       #   run: cat cliff.toml
 
-      # - name: Debug List commits
-      #   run: git log --oneline
+#       # - name: Debug List commits
+#       #   run: git log --oneline
 
-      # - name: Debug Print the changelog
-      #   run: cat CHANGELOG.md
+#       # - name: Debug Print the changelog
+#       #   run: cat CHANGELOG.md
 
-      - name: Commit and push changes
-        if: success()
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG.md"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       - name: Commit and push changes
+#         if: success()
+#         run: |
+#           git config --global user.name "github-actions[bot]"
+#           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+#           git add CHANGELOG.md
+#           git commit -m "chore: update CHANGELOG.md"
+#           git push
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
