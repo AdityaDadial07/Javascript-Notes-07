@@ -1,6 +1,6 @@
 //Normal function
-function sum(a, b) {
-    return a + b;
+function sum(a, c) {
+    return a + c;
 }
 console.log(sum(1,3))//4
 
