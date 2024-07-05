@@ -1,111 +1,111 @@
-name: Auto Version Bump and Tagging
+# name: Auto Version Bump and Tagging
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  version-bump-and-tag:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Ensure the workflow has write permission
+# jobs:
+#   version-bump-and-tag:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: write  # Ensure the workflow has write permission
 
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Check out repository
+#         uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0
 
-      - name: Set up git-cliff
-        uses: kenji-miyake/setup-git-cliff@v1
+#       - name: Set up git-cliff
+#         uses: kenji-miyake/setup-git-cliff@v1
 
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
-        with:
-          config: cliff.toml
-          args: --verbose
-        env:
-          OUTPUT: CHANGELOG.md
-          GITHUB_REPO: ${{ github.repository }}
+#       - name: Generate a changelog
+#         uses: orhun/git-cliff-action@v3
+#         with:
+#           config: cliff.toml
+#           args: --verbose
+#         env:
+#           OUTPUT: CHANGELOG.md
+#           GITHUB_REPO: ${{ github.repository }}
 
-      - name: Determine Version Bump
-        id: version_bump
-        run: |
-          # Get the current version
-          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Current Version: $CURRENT_VERSION"
+#       - name: Determine Version Bump
+#         id: version_bump
+#         run: |
+#           # Get the current version
+#           CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+#           echo "Current Version: $CURRENT_VERSION"
           
-          # Determine the new version based on commit messages
-          if [ "$CURRENT_VERSION" = "v0.0.0" ]; then
-            COMMITS=$(git log --pretty=format:"%s")
-          else
-            COMMITS=$(git log --pretty=format:"%s" "$CURRENT_VERSION"..HEAD)
-          fi
+#           # Determine the new version based on commit messages
+#           if [ "$CURRENT_VERSION" = "v0.0.0" ]; then
+#             COMMITS=$(git log --pretty=format:"%s")
+#           else
+#             COMMITS=$(git log --pretty=format:"%s" "$CURRENT_VERSION"..HEAD)
+#           fi
 
-          MAJOR=false
-          MINOR=false
-          PATCH=false
+#           MAJOR=false
+#           MINOR=false
+#           PATCH=false
           
-          for COMMIT in $COMMITS; do
-            if [[ "$COMMIT" == "feat:"* ]]; then
-              MINOR=true
-            elif [[ "$COMMIT" == "fix:"* ]]; then
-              PATCH=true
-            elif [[ "$COMMIT" == *"BREAKING CHANGE"* ]]; then
-              MAJOR=true
-            fi
-          done
+#           for COMMIT in $COMMITS; do
+#             if [[ "$COMMIT" == "feat:"* ]]; then
+#               MINOR=true
+#             elif [[ "$COMMIT" == "fix:"* ]]; then
+#               PATCH=true
+#             elif [[ "$COMMIT" == *"BREAKING CHANGE"* ]]; then
+#               MAJOR=true
+#             fi
+#           done
           
-          IFS='.' read -ra VERSION_PARTS <<< "${CURRENT_VERSION#v}"
-          MAJOR_VERSION=${VERSION_PARTS[0]}
-          MINOR_VERSION=${VERSION_PARTS[1]}
-          PATCH_VERSION=${VERSION_PARTS[2]}
+#           IFS='.' read -ra VERSION_PARTS <<< "${CURRENT_VERSION#v}"
+#           MAJOR_VERSION=${VERSION_PARTS[0]}
+#           MINOR_VERSION=${VERSION_PARTS[1]}
+#           PATCH_VERSION=${VERSION_PARTS[2]}
           
-          if $MAJOR; then
-            MAJOR_VERSION=$((MAJOR_VERSION + 1))
-            MINOR_VERSION=0
-            PATCH_VERSION=0
-          elif $MINOR; then
-            MINOR_VERSION=$((MINOR_VERSION + 1))
-            PATCH_VERSION=0
-          elif $PATCH; then
-            PATCH_VERSION=$((PATCH_VERSION + 1))
-          else
-            PATCH_VERSION=$((PATCH_VERSION + 1))  # Default to patch bump if no commits matched
-          fi
+#           if $MAJOR; then
+#             MAJOR_VERSION=$((MAJOR_VERSION + 1))
+#             MINOR_VERSION=0
+#             PATCH_VERSION=0
+#           elif $MINOR; then
+#             MINOR_VERSION=$((MINOR_VERSION + 1))
+#             PATCH_VERSION=0
+#           elif $PATCH; then
+#             PATCH_VERSION=$((PATCH_VERSION + 1))
+#           else
+#             PATCH_VERSION=$((PATCH_VERSION + 1))  # Default to patch bump if no commits matched
+#           fi
           
-          NEW_VERSION="v$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
-          echo "New Version: $NEW_VERSION"
+#           NEW_VERSION="v$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION"
+#           echo "New Version: $NEW_VERSION"
           
-          echo "::set-output name=new_version::$NEW_VERSION"
+#           echo "::set-output name=new_version::$NEW_VERSION"
 
-      - name: Configure Git
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
+#       - name: Configure Git
+#         run: |
+#           git config --global user.email "action@github.com"
+#           git config --global user.name "GitHub Action"
 
-      - name: Tag New Version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          NEW_VERSION=${{ steps.version_bump.outputs.new_version }}
-          git tag "$NEW_VERSION" HEAD
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} "$NEW_VERSION"
+#       - name: Tag New Version
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           NEW_VERSION=${{ steps.version_bump.outputs.new_version }}
+#           git tag "$NEW_VERSION" HEAD
+#           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} "$NEW_VERSION"
 
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.version_bump.outputs.new_version }}
-          release_name: Release ${{ steps.version_bump.outputs.new_version }}
-          body: |
-            ## Changelog
-            $(cat CHANGELOG.md)
-          draft: false
-          prerelease: false
+#       - name: Create GitHub Release
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           tag_name: ${{ steps.version_bump.outputs.new_version }}
+#           release_name: Release ${{ steps.version_bump.outputs.new_version }}
+#           body: |
+#             ## Changelog
+#             $(cat CHANGELOG.md)
+#           draft: false
+#           prerelease: false
 
-      - name: Print New Version
-        run: |
-         echo "New version tagged and released: ${{ steps.version_bump.outputs.new_version }}"
+#       - name: Print New Version
+#         run: |
+#          echo "New version tagged and released: ${{ steps.version_bump.outputs.new_version }}"
