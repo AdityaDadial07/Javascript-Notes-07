@@ -32,14 +32,14 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
 
-      - name: Debug Print config
-        run: cat cliff.toml
+      # - name: Debug Print config
+      #   run: cat cliff.toml
 
-      - name: Debug List commits
-        run: git log --oneline
+      # - name: Debug List commits
+      #   run: git log --oneline
 
-      - name: Debug Print the changelog
-        run: cat CHANGELOG.md
+      # - name: Debug Print the changelog
+      #   run: cat CHANGELOG.md
 
       - name: Commit and push changes
         if: success()
