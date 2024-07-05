@@ -9,6 +9,16 @@ Changelog
 - Update CHANGELOG.md
 
 
+### Feat
+
+- Update release3.yml
+
+
+### Chore
+
+- Update CHANGELOG.md
+
+
 ### Fix
 
 - Update index.js
