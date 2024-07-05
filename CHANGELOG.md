@@ -1,4 +1,14 @@
 Changelog
+### Fix
+
+- Update index.js
+
+
+### Chore
+
+- Update CHANGELOG.md
+
+
 ### Feat
 
 - Update release3.yml
