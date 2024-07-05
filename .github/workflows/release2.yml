@@ -5,6 +5,9 @@ on:
     branches:
       - main
       
+permissions:
+  contents: write  # Grant write permissions to the GITHUB_TOKEN
+
 jobs:
   changelog:
     name: Generate changelog
@@ -29,13 +32,13 @@ jobs:
         env:
           OUTPUT: CHANGELOG.md
 
-      - name: Debug
+      - name: Debug: Print config
         run: cat cliff.toml
 
-      - name: Debug
+      - name: Debug: List commits
         run: git log --oneline
 
-      - name: Debug
+      - name: Debug: Print the changelog
         run: cat CHANGELOG.md
 
       - name: Commit and push changes
