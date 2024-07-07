@@ -4,8 +4,8 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write  # Grant write permissions to the GITHUB_TOKEN   
+# permissions:
+#   contents: write  # Grant write permissions to the GITHUB_TOKEN   
 
 jobs:
   release:
