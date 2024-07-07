@@ -1,0 +1,25 @@
+name: Cargo Semver Bump
+
+on:
+  push:
+    branches:
+      - main # Trigger this workflow on pushes to the main branch
+
+jobs:
+  build-and-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+        
+      - name: Install cargo-semver-bump
+        run: |
+          cargo install cargo-semver-bump --locked
+        
+      - name: Bump version
+        run: cargo semver-bump
