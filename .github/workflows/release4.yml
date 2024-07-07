@@ -5,12 +5,12 @@ on:
     branches:
       - main
       
-  workflow_dispatch:
-    inputs:
-      release_type:
-        description: 'Release type (major, minor, patch)'
-        required: true
-        default: 'patch'
+  # workflow_dispatch:
+  #   inputs:
+  #     release_type:
+  #       description: 'Release type (major, minor, patch)'
+  #       required: true
+  #       default: 'patch'
 
 permissions:
   contents: write 
