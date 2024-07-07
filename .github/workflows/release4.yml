@@ -9,17 +9,15 @@ jobs:
   build-and-bump:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
         with:
-          toolchain: stable
-          override: true
-        
-      - name: Install cargo-semver-bump
-        run: |
-          cargo install cargo-semver-bump --locked
-        
-      - name: Bump version
-        run: cargo semver-bump
+          # fetch-depth 0 will check out all the commits and tags needed for the bumper
+          fetch-depth: 0
+
+      - id: bumper
+        uses: tomerfi/version-bumper-action@2.0.1
+
+      # Assuming previous tag was 1.2.4 and feat-type commits were made, this will print 1.3.0.
+      - name: Print next version
+        run: echo ${{ steps.bumper.outputs.next }}
