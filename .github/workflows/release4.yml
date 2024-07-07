@@ -1,15 +1,9 @@
 name: Releases
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  workflow_dispatch:
-    inputs:
-      release_type:
-        description: 'Release type (major, minor, patch)'
-        required: true
-        default: major
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write 
