@@ -1,8 +1,15 @@
 name: Releases
+
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type (major, minor, patch)'
+        required: true
+        default: major
 
 permissions:
   contents: write 
@@ -20,3 +27,5 @@ jobs:
         uses: huggingface/semver-release-action@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_type: ${{ github.event.inputs.release_type }}
