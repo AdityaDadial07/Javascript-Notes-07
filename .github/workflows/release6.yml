@@ -1,69 +1,63 @@
-# name: Releases
+name: Automated Release
 
-# on:
-#   push:
-#     branches:
-#       - main
-      
-# permissions:
-#   contents: write 
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-#   changelog:
-#     name: Generate changelog
-#     runs-on: ubuntu-latest
-#     outputs:
-#       release_body: ${{ steps.git-cliff.outputs.content }}
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0
-      
-#       - name: Generate a changelog
-#         uses: orhun/git-cliff-action@v3
-#         id: git-cliff
-#         with:
-#           config: cliff.toml
-#           args: -vv --latest --strip header
-#         env:
-#           OUTPUT: CHANGES.md
-#           GITHUB_REPO: ${{ github.repository }}
-      
-#       # Add a step to create your binary_release.zip
-#       - name: Create release archive
-#         run: |
-#           # Commands to create your binary_release.zip
-#           # For example:
-#           zip -r binary_release.zip . -x "*.git*"
-      
-#       - name: Upload the binary releases
-#         uses: svenstaro/upload-release-action@v2
-#         with:
-#           file: binary_release.zip
-#           repo_token: ${{ secrets.GITHUB_TOKEN }}
-#           tag: ${{ github.ref }}
-#           body: ${{ steps.git-cliff.outputs.content }}
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-#   upload:
-#     name: Upload the release
-#     needs: changelog
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-      
-#       # If you need to recreate the zip file in this job
-#       - name: Create release archive
-#         run: |
-#           # Commands to create your binary_release.zip
-#           # For example:
-#           zip -r binary_release.zip . -x "*.git*"
-      
-#       - name: Upload the binary releases
-#         uses: svenstaro/upload-release-action@v2
-#         with:
-#           file: binary_release.zip
-#           repo_token: ${{ secrets.GITHUB_TOKEN }}
-#           tag: ${{ github.ref }}
-#           body: ${{ needs.changelog.outputs.release_body }}
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v2
+        with:
+          config: cliff.toml
+          args: --output CHANGELOG.md
+
+      - name: Read current version
+        id: current_version
+        run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bumpr
+        uses: haya14busa/action-bumpr@v1
+        with:
+          default_bump_level: patch
+          dry_run: false
+
+      - name: Update VERSION file
+        if: steps.bumpr.outputs.new_version != ''
+        run: echo "${{ steps.bumpr.outputs.new_version }}" > VERSION
+
+      - name: Commit changes
+        if: steps.bumpr.outputs.new_version != ''
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add CHANGELOG.md VERSION
+          git commit -m "Bump version to ${{ steps.bumpr.outputs.new_version }} and update changelog"
+
+      - name: Push changes
+        if: steps.bumpr.outputs.new_version != ''
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: Create Release
+        if: steps.bumpr.outputs.new_version != ''
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.bumpr.outputs.new_version }}
+          name: Release ${{ steps.bumpr.outputs.new_version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
