@@ -1,25 +1,25 @@
-name: Release
+# name: Release
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-permissions:
-  contents: write 
+# permissions:
+#   contents: write 
 
-jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
+# jobs:
+#   release:
+#     name: Release
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-      - name: Release
-        uses: huggingface/semver-release-action@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_type: ${{ github.event.inputs.release_type }}
+#       - name: Release
+#         uses: huggingface/semver-release-action@latest
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           release_type: ${{ github.event.inputs.release_type }}
