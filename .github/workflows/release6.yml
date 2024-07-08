@@ -5,6 +5,9 @@ on:
     branches:
       - main  # Adjust this to your main branch name if different
 
+permissions:
+  contents: write  # This gives the workflow permission to create releases
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -26,7 +29,6 @@ jobs:
       - name: Read version from file
         id: get_version
         run: echo "VERSION=$(cat VERSION.txt)" >> $GITHUB_OUTPUT
-        # Assumes you have a VERSION.txt file with the current version
 
       - name: Create Release
         id: create_release
