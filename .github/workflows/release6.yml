@@ -1,69 +1,69 @@
-name: Releases
+# name: Releases
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
       
-permissions:
-  contents: write 
+# permissions:
+#   contents: write 
 
-jobs:
-  changelog:
-    name: Generate changelog
-    runs-on: ubuntu-latest
-    outputs:
-      release_body: ${{ steps.git-cliff.outputs.content }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+# jobs:
+#   changelog:
+#     name: Generate changelog
+#     runs-on: ubuntu-latest
+#     outputs:
+#       release_body: ${{ steps.git-cliff.outputs.content }}
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
       
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
-        id: git-cliff
-        with:
-          config: cliff.toml
-          args: -vv --latest --strip header
-        env:
-          OUTPUT: CHANGES.md
-          GITHUB_REPO: ${{ github.repository }}
+#       - name: Generate a changelog
+#         uses: orhun/git-cliff-action@v3
+#         id: git-cliff
+#         with:
+#           config: cliff.toml
+#           args: -vv --latest --strip header
+#         env:
+#           OUTPUT: CHANGES.md
+#           GITHUB_REPO: ${{ github.repository }}
       
-      # Add a step to create your binary_release.zip
-      - name: Create release archive
-        run: |
-          # Commands to create your binary_release.zip
-          # For example:
-          zip -r binary_release.zip . -x "*.git*"
+#       # Add a step to create your binary_release.zip
+#       - name: Create release archive
+#         run: |
+#           # Commands to create your binary_release.zip
+#           # For example:
+#           zip -r binary_release.zip . -x "*.git*"
       
-      - name: Upload the binary releases
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: binary_release.zip
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref }}
-          body: ${{ steps.git-cliff.outputs.content }}
+#       - name: Upload the binary releases
+#         uses: svenstaro/upload-release-action@v2
+#         with:
+#           file: binary_release.zip
+#           repo_token: ${{ secrets.GITHUB_TOKEN }}
+#           tag: ${{ github.ref }}
+#           body: ${{ steps.git-cliff.outputs.content }}
 
-  upload:
-    name: Upload the release
-    needs: changelog
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+#   upload:
+#     name: Upload the release
+#     needs: changelog
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
       
-      # If you need to recreate the zip file in this job
-      - name: Create release archive
-        run: |
-          # Commands to create your binary_release.zip
-          # For example:
-          zip -r binary_release.zip . -x "*.git*"
+#       # If you need to recreate the zip file in this job
+#       - name: Create release archive
+#         run: |
+#           # Commands to create your binary_release.zip
+#           # For example:
+#           zip -r binary_release.zip . -x "*.git*"
       
-      - name: Upload the binary releases
-        uses: svenstaro/upload-release-action@v2
-        with:
-          file: binary_release.zip
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref }}
-          body: ${{ needs.changelog.outputs.release_body }}
+#       - name: Upload the binary releases
+#         uses: svenstaro/upload-release-action@v2
+#         with:
+#           file: binary_release.zip
+#           repo_token: ${{ secrets.GITHUB_TOKEN }}
+#           tag: ${{ github.ref }}
+#           body: ${{ needs.changelog.outputs.release_body }}
