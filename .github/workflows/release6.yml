@@ -1,27 +1,51 @@
-name: Main
+name: Release and Tag
 
 on:
   push:
-    tags:
-      - "v*.*.*"
     branches:
-      - main
+      - main  # Adjust this to your main branch name if different
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Get Latest Tag
-        id: get-tag
-        run: echo "::set-output name=tag::$(git describe --tags --abbrev=0)"
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate a changelog
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: --verbose
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Read version from file
+        id: get_version
+        run: echo "VERSION=$(cat VERSION.txt)" >> $GITHUB_OUTPUT
+        # Assumes you have a VERSION.txt file with the current version
+
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get-tag.outputs.tag }} # Corrected line
-          release_name: Release ${{ steps.get-tag.outputs.tag }}
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          body_path: CHANGELOG.md
           draft: false
           prerelease: false
+
+      - name: Upload Changelog
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./CHANGELOG.md
+          asset_name: CHANGELOG.md
+          asset_content_type: text/markdown
